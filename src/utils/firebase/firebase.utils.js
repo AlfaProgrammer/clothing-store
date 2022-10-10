@@ -9,7 +9,10 @@ import {
     // signInWithRedirect,
     signInWithPopup,
     GoogleAuthProvider,
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
 } from "firebase/auth"
 
 //FIRESTORE SETUP
@@ -31,25 +34,25 @@ const firebaseConfig = {
     messagingSenderId: "1057609647840",  
     appId: "1:1057609647840:web:7a2ffc99b6cf3b8133b285"
   
-  };  
+};  
   
-  // // Initialize Firebase  
-  const firebaseApp = initializeApp(firebaseConfig);
+// // Initialize Firebase  
+const firebaseApp = initializeApp(firebaseConfig);
 
-  //provider sett
-  const googleProvider = new GoogleAuthProvider();
-  googleProvider.setCustomParameters({
-    prompt: "select_account" // ogni volta che facciamo un accesso 
-    //vogliamo forzare l'utente a selezionare un account
-  })
+//provider sett
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: "select_account" // ogni volta che facciamo un accesso 
+  //vogliamo forzare l'utente a selezionare un account
+})
 
-  export const auth = getAuth(firebaseApp);
-  export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
-  //potrebbero esserci più tipi di provider per le differenti modalita di signIn
-  //auth invece è unico, si fa in un solo modo.
+export const auth = getAuth(firebaseApp);
+export const signInWithGooglePopup = async () => await signInWithPopup(auth, googleProvider);
+//potrebbero esserci più tipi di provider per le differenti modalita di signIn
+//auth invece è unico, si fa in un solo modo.
 
-  //creaiamo il db
-  export const db = getFirestore(); // è come avere il Context del DB
+//creaiamo il db
+export const db = getFirestore(); // è come avere il Context del DB
 //   ora possiamo usare questo context ovunque nel codice. Punta direttamente al DB nell console di FireBase
 
 //ora possiamo creare methods personalizzati per interagire con il db
@@ -83,7 +86,23 @@ export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {} )
     return userDocRef;
 }
 
+
+//interface per creare un nuovo utente con email e password, native provider, no third part provider as google or fb
 export const createAuthUserWiithEmalAndPassword = async(email, password) => {
   if(!email || !password) return;
+
   return await createUserWithEmailAndPassword(auth, email, password)
 }
+
+//interface per log-in con email e password
+export const signInUserWiithEmailAndPassword = async(email, password) => {
+  if(!email || !password) return;
+  
+  return await signInWithEmailAndPassword(auth, email, password)
+}
+
+export const signOutUser = async () => await signOut(auth);
+
+//essendo che stiamo utilizzando una funzione nostra personalizzata, la callbak dobbiamo
+//passerchiela a onAuthStateChange quando invochimao la nostra funzione
+export const onAuthStateChangedListener = (callback) => onAuthStateChanged(auth, callback);
