@@ -1,23 +1,28 @@
-import "./button.styles.scss";
-//abbiamo tre tipi di button che devono essere creati partendo da questo componente
-
-//defaul 
-
-//inverted
-
-//google-sing in
+import {
+    BaseButton,
+    GoogleSignInButton,
+    InvertedButton
+} from "./button.styles";
 
 //creiamo quindi delle classi da applicare dinamicamente
-const BUTTON_TYPE_CLASSES = {
+export const BUTTON_TYPE_CLASSES = {
+    base: "base",
     google: "google-sign-in",
     inverted: "inverted"
 }
 
-const Button = ({children, buttonType, ...otherProps}) => {
+const getButton = (buttonType = BUTTON_TYPE_CLASSES.base) => (
+    {
+        [BUTTON_TYPE_CLASSES.base]: BaseButton,
+        [BUTTON_TYPE_CLASSES.google]: GoogleSignInButton,
+        [BUTTON_TYPE_CLASSES.inverted]: InvertedButton
+    }[buttonType]
+);
 
-    return(
-        <button className={`button-container  ${BUTTON_TYPE_CLASSES[buttonType]}`} {...otherProps}> {children} </button>
-    )
+
+const Button = ({children, buttonType, ...otherProps}) => {
+    const CustomButton = getButton(buttonType);
+    return <CustomButton {...otherProps}> {children} </CustomButton>
 }
 
 export default Button;

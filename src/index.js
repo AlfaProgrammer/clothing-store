@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 //importing context providers
 import { UserProvider } from './contexts/user.context';
-import {ProductsProvider} from './contexts/porducts.context';
+import {CategoriesProvider} from './contexts/categories.context';
 import { CartProvider } from './contexts/cart.context';
 // import reportWebVitals from './reportWebVitals';
 
@@ -16,11 +16,11 @@ root.render(
   <React.StrictMode>
     <BrowserRouter> {/* funge da middleware, filtro per accedere all'app*/}   
       <UserProvider> {/*context component*/}
-        <ProductsProvider> {/* inserito qui perché l'autenticazione viene prima dei prodotti*/}
+        <CategoriesProvider> {/* inserito qui perché l'autenticazione viene prima dei prodotti*/}
           <CartProvider>
             <App />
           </CartProvider>
-        </ProductsProvider>
+        </CategoriesProvider>
       </UserProvider>
     </BrowserRouter>
   </React.StrictMode>

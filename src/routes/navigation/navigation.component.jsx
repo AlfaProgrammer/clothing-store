@@ -1,5 +1,5 @@
 import { Fragment, useContext } from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 import CartIcon from "../../components/cart-icon/cart-icon.component";
 import CartDropdown from "../../components/cart-dropdown/cart-dropdown.component";
@@ -10,7 +10,12 @@ import { CartContext } from "../../contexts/cart.context";
 
 import { signOutUser } from "../../utils/firebase/firebase.utils";
 
-import "./navigation.styles.scss"
+import {
+  NavigationContainer,
+  LogoContainer,
+  NavLinksContainer,
+  NavLink
+} from "./navigation.styles";
 
 const NavBar = () => {
   // quando un valore dentro un HOOK cambia vene ri-renderizzato il componente
@@ -20,23 +25,31 @@ const NavBar = () => {
    
     return(
       <Fragment>
-        <div className="navigation">
-          <Link className="logo-container" to="/">
+        <NavigationContainer>
+          <LogoContainer to="/">
               <CrwnLogo className="logo"/>
-          </Link>
+          </LogoContainer>
           
-          <div className="nav-links-container">
-            <Link className="nav-link" to="/shop">SHOP</Link>
+          <NavLinksContainer>
+            <NavLink to="/shop">SHOP</NavLink>
 
             {/* se il currentUser esiste significa che è loggato */}
-            {currentUser? (<span className="nav-link" onClick={signOutUser}> Sign-Out </span>) : (<Link className="nav-link" to="/auth">Sign-in</Link>)}            
+            {currentUser? (
+              <NavLink as="span" onClick={signOutUser}> 
+                Sign-Out 
+              </NavLink>) : (
+              <NavLink to="/auth">
+                Sign-in
+              </NavLink>
+              )
+              }            
             <CartIcon/>
-          </div>
+          </NavLinksContainer>
           {/* Total Statement deve essere true, quindi sia il valore di destra che di sinistra se sono true mi restituisce
           quello di destra(l'ultimo). Un componente è sempre === true xke è una funzione */}
           {/* Se uno dei valori è false JS esce da questa operazione immediatamente */}
           {isCartOpen && <CartDropdown/>}
-        </div>
+        </NavigationContainer>
         
         <Outlet />
         

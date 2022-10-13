@@ -18,9 +18,14 @@ import {
 //FIRESTORE SETUP
 import {
     getFirestore, //per istanziare FireSTORE
-    doc, //per recuperare i DOCUMENTI dentro il nostro FIRESTORE DB (db, collection, id)
+    doc, //per recuperare i DOCUMENTI dentro il nostro FIRESTORE DB (db, collection, id). Se gli passi direttamente la collection si prenderà da
+    //i dati del db (perché la collection li contiene)
     getDoc, // per recuperare i dati DAL DOCUMENTO
-    setDoc  //per scrivere dati SUL DOCUMENTO
+    setDoc,  //per scrivere dati SUL DOCUMENTO
+    collection, //ci permette di avere una COLLECTION REFERENCE
+    writeBatch, //usato avere delle transaction di successo sul DB (se un'operazione fallisce deve fallire tutta la transazione)
+    query, //query sul db
+    getDocs // prenderà i documenti dalla query
 } from "firebase/firestore";
 
 // Your web app's Firebase configuration
@@ -55,6 +60,23 @@ export const signInWithGooglePopup = async () => await signInWithPopup(auth, goo
 export const db = getFirestore(); // è come avere il Context del DB
 //   ora possiamo usare questo context ovunque nel codice. Punta direttamente al DB nell console di FireBase
 
+//verra utilizzata in prducts.context.jsx
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+  //collectionKey = nome della collection
+  //objectsToAdd = documenti da aggiungere
+  const collectionRef = collection(db, collectionKey);
+  // PER eseguire una TRANSACTION DI SUCCESSO
+  const batch = writeBatch(db); //questo contiene methods come batch.set o batch.get per scrivere sulla collection
+  objectsToAdd.forEach( (object) => {
+    const docRef = doc(collectionRef, object.title.toLowerCase()); //creo il documento nella collection
+    batch.set(docRef, object); //inserisco i dati nel documento
+  });
+
+  await batch.commit(); // aspetto che tutte le operazioni di batch scritte fino a qui vengano eseguite
+  console.log("done");
+
+}
+
 //ora possiamo creare methods personalizzati per interagire con il db
 export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {} ) => {
     if(!userAuth) return;
@@ -86,6 +108,21 @@ export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {} )
     return userDocRef;
 }
 
+//ora andiamo a recuperare i dati dal DB con una query
+export const getCategloriesAndDocument = async () => {
+
+  const collectionRef = collection(db, "categories"); // db è l'istanza FireStore
+  const q = query(collectionRef); // q = query su questa collection
+  
+  const querySnapshot = await getDocs(q); //prende i documenti da questa query che mi ritrovo dentro querySnapshot.docs
+  const categoryMap = querySnapshot.docs.reduce( (acc, currDocSnapshot)=> {
+    const {title, items} = currDocSnapshot.data(); //prende i dati del documento
+    acc[title.toLowerCase()] = items;
+    return acc;
+  }, {})
+
+  return categoryMap;
+}
 
 //interface per creare un nuovo utente con email e password, native provider, no third part provider as google or fb
 export const createAuthUserWiithEmalAndPassword = async(email, password) => {
